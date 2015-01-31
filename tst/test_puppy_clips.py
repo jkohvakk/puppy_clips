@@ -3,7 +3,7 @@ import puppyclips
 import mock_time
 
 
-class MockMovementSensor(object):
+class SelfTrackingMock(object):
 
     instances = []
 
@@ -18,6 +18,9 @@ class MockMovementSensor(object):
     def __init__(self):
         self.__class__.instances.append(self)
         self._calls = []
+
+
+class MockMovementSensor(SelfTrackingMock):
 
     def is_movement(self):
         self._calls.append('is_movement')
@@ -30,21 +33,7 @@ class MockMovementSensor(object):
         self._movement = movement
 
 
-class MockPiCamera(object):
-
-    instances = []
-
-    @classmethod
-    def get_instances(cls):
-        return cls.instances
-
-    @classmethod
-    def reset(cls):
-        cls.instances = []
-
-    def __init__(self):
-        self.__class__.instances.append(self)
-        self._calls = []
+class MockPiCamera(SelfTrackingMock):
 
     def start_recording(self, *args):
         if hasattr(self, 'start_recording_args'):
@@ -84,17 +73,16 @@ class TestPuppyClips(unittest.TestCase):
                          ['is_movement', 'is_movement', 'is_movement'])
 
     def test_if_movement_a_minute_clip_is_taken_with_name_based_on_current_datetime(self):
-        puppyclips.picamera.PiCamera = MockPiCamera
         self.pc._movementsensor.set_movement([False, True, False])
         self.pc.run(3)
         self.assertEqual(mock_time.get_mock_sleep_calls(), 4)
         self.assertEqual(mock_time.get_mock_sleep_times(), [1, 1, 60, 1])
-        self.assertTrue(MockPiCamera.get_instances()[0].start_recording_called_once_with('TODO_FILENAME'))
+        self.assertTrue(MockPiCamera.get_instances()[0].start_recording_called_once_with('2015.01.31-20:10.h264'))
         self.assertTrue(MockPiCamera.get_instances()[0].stop_recording_called_once_with())
 
-
-    def test_clip_is_stored_with_end_timestamp(self):
-        pass
+    def test_camera_is_flipper_both_horizontally_and_vertically(self):
+        self.assertTrue(MockPiCamera.get_instances()[0].hflip)
+        self.assertTrue(MockPiCamera.get_instances()[0].vflip)
 
 
 if __name__ == "__main__":

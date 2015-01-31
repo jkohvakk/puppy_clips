@@ -22,3 +22,6 @@ def sleep(seconds):
     mock_sleep_calls += 1
     mock_sleep_times.append(seconds)
 
+def strftime(*args, **kwargs):
+    return '2015.01.31-20:10'
+
