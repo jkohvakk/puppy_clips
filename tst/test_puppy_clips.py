@@ -80,10 +80,6 @@ class TestPuppyClips(unittest.TestCase):
         self.assertTrue(MockPiCamera.get_instances()[0].start_recording_called_once_with('2015.01.31-20:10.h264'))
         self.assertTrue(MockPiCamera.get_instances()[0].stop_recording_called_once_with())
 
-    def test_camera_is_flipper_both_horizontally_and_vertically(self):
-        self.assertTrue(MockPiCamera.get_instances()[0].hflip)
-        self.assertTrue(MockPiCamera.get_instances()[0].vflip)
-
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

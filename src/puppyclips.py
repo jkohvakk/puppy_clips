@@ -8,8 +8,6 @@ class PuppyClips(object):
     def __init__(self):
         self._movementsensor = movementsensor.MovementSensor()
         self._camera = picamera.PiCamera()
-        self._camera.hflip = True
-        self._camera.vflip = True
 
     def run(self, round_count='infinite'):
         loop_count = round_count if round_count != 'infinite' else 1
