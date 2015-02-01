@@ -55,6 +55,15 @@ class MockSubprocess(object):
     def call(cls, args):
         cls.call_calls.append(args)
 
+class MockOs(object):
+
+    remove_calls = []
+
+    @classmethod
+    def remove(cls, filename):
+        cls.remove_calls.append(filename)
+
+
 
 class TestPuppyClips(unittest.TestCase):
 
@@ -94,11 +103,12 @@ class TestPuppyClips(unittest.TestCase):
 
     def test_clip_is_converted_from_h264_to_mp4(self):
         puppyclips.subprocess = MockSubprocess
+        puppyclips.os = MockOs
         self.pc._movementsensor.set_movement([False, True, False])
         self.pc.run(3)
-        self.assertEqual(MockSubprocess.call_calls, [['MP4Box', '-fps', '30', '-add',
+        self.assertEqual(MockSubprocess.call_calls, [['MP4Box', '-fps', '30', '-add'
                                                       '2015.01.31-20:10.h264', '2015.01.31-20:10.mp4']])
-
+        self.assertEqual(MockOs.remove_calls[0], '2015.01.31-20:10.h264')
 
 
 if __name__ == "__main__":

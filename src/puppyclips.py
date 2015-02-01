@@ -3,6 +3,7 @@ import movementsensor
 import picamera
 import sys
 import subprocess
+import os
 
 
 class PuppyClips(object):
@@ -10,6 +11,7 @@ class PuppyClips(object):
     def __init__(self):
         self._movementsensor = movementsensor.MovementSensor()
         self._camera = picamera.PiCamera()
+        self._camera.exposure_compensation = 25
 
     def run(self, round_count='infinite', max_clips=60):
         loop_count = round_count if round_count != 'infinite' else 1
@@ -26,9 +28,10 @@ class PuppyClips(object):
         self._camera.start_recording('{}.h264'.format(name))
         time.sleep(60)
         self._camera.stop_recording()
-        subprocess.call(['MP4Box', '-fps', '30', '-add',
+        subprocess.call(['MP4Box', '-fps', '30', '-add'
                          '{}.h264'.format(name),
                          '{}.mp4'.format(name)])
+        os.remove('{}.h264'.format(name))
         self._clips += 1
 
 
