@@ -3,24 +3,7 @@ import movementsensor
 import RPi
 
 
-class SelfTrackingMock(object):
-
-    instances = []
-
-    @classmethod
-    def get_instances(cls):
-        return cls.instances
-
-    @classmethod
-    def reset(cls):
-        cls.instances = []
-
-    def __init__(self):
-        self.__class__.instances.append(self)
-        self._calls = []
-
-
-class MockGPIO(SelfTrackingMock):
+class MockGPIO(object):
 
     BCM = 'BCM'
     IN = 'IN'
