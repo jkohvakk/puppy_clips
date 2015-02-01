@@ -106,7 +106,7 @@ class TestPuppyClips(unittest.TestCase):
         puppyclips.os = MockOs
         self.pc._movementsensor.set_movement([False, True, False])
         self.pc.run(3)
-        self.assertEqual(MockSubprocess.call_calls, [['MP4Box', '-fps', '30', '-add'
+        self.assertEqual(MockSubprocess.call_calls, [['MP4Box', '-fps', '30', '-add',
                                                       '2015.01.31-20:10.h264', '2015.01.31-20:10.mp4']])
         self.assertEqual(MockOs.remove_calls[0], '2015.01.31-20:10.h264')
 

@@ -28,7 +28,7 @@ class PuppyClips(object):
         self._camera.start_recording('{}.h264'.format(name))
         time.sleep(60)
         self._camera.stop_recording()
-        subprocess.call(['MP4Box', '-fps', '30', '-add'
+        subprocess.call(['MP4Box', '-fps', '30', '-add',
                          '{}.h264'.format(name),
                          '{}.mp4'.format(name)])
         os.remove('{}.h264'.format(name))
