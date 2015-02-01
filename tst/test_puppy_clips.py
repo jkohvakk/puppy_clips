@@ -55,6 +55,11 @@ class MockSubprocess(object):
     def call(cls, args):
         cls.call_calls.append(args)
 
+    @classmethod
+    def reset(cls):
+        cls.call_calls = []
+
+
 class MockOs(object):
 
     remove_calls = []
@@ -70,6 +75,7 @@ class TestPuppyClips(unittest.TestCase):
     def setUp(self):
         MockMovementSensor.reset()
         MockPiCamera.reset()
+        MockSubprocess.reset()
         puppyclips.movementsensor.MovementSensor = MockMovementSensor
         puppyclips.picamera.PiCamera = MockPiCamera
         puppyclips.time = mock_time
@@ -106,9 +112,17 @@ class TestPuppyClips(unittest.TestCase):
         puppyclips.os = MockOs
         self.pc._movementsensor.set_movement([False, True, False])
         self.pc.run(3)
-        self.assertEqual(MockSubprocess.call_calls, [['MP4Box', '-fps', '30', '-add',
-                                                      '2015.01.31-20:10.h264', '2015.01.31-20:10.mp4']])
+        self.assertEqual(MockSubprocess.call_calls[0], ['MP4Box', '-fps', '30', '-add',
+                                                      '2015.01.31-20:10.h264', '2015.01.31-20:10.mp4'])
         self.assertEqual(MockOs.remove_calls[0], '2015.01.31-20:10.h264')
+
+    def test_clip_is_uploaded_to_dropbox(self):
+        puppyclips.subprocess = MockSubprocess
+        self.pc._movementsensor.set_movement([False, True, False])
+        self.pc.run(3)
+        self.assertEqual(MockSubprocess.call_calls[1], ['/home/pi/Dropbox-Uploader/dropbox_uploader.sh', 'upload',
+                                                        '2015.01.31-20:10.mp4', '2015.01.31-20:10.mp4'])
+
 
 
 if __name__ == "__main__":
