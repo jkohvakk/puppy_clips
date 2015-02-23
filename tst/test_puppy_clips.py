@@ -33,12 +33,14 @@ class MockMovementSensor(SelfTrackingMock):
         self._movement = movement
 
 
-class MockPiCamera(SelfTrackingMock):
+class MockPiCamera(SelfTrackingMock, unittest.TestCase):
 
-    def __init__(self):
+    def __init__(self, framerate=1):
         super(MockPiCamera, self).__init__()
         self.start_recording_calls = []
         self.stop_recording_calls = []
+        if framerate != 20:
+            self.fail('Expected framerate to be 20')
 
     def start_recording(self, *args):
         self.start_recording_calls.append(args)
@@ -112,7 +114,7 @@ class TestPuppyClips(unittest.TestCase):
         puppyclips.os = MockOs
         self.pc._movementsensor.set_movement([False, True, False])
         self.pc.run(3)
-        self.assertEqual(MockSubprocess.call_calls[0], ['MP4Box', '-fps', '30', '-add',
+        self.assertEqual(MockSubprocess.call_calls[0], ['MP4Box', '-fps', '20', '-add',
                                                       '2015.01.31-20:10.h264', '2015.01.31-20:10.mp4'])
         self.assertEqual(MockOs.remove_calls[0], '2015.01.31-20:10.h264')
 

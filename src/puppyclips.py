@@ -10,8 +10,8 @@ class PuppyClips(object):
 
     def __init__(self):
         self._movementsensor = movementsensor.MovementSensor()
-        self._camera = picamera.PiCamera()
-        self._camera.exposure_compensation = 25
+        self._camera = picamera.PiCamera(framerate=20)
+        self._camera.brightness = 70
 
     def run(self, round_count='infinite', max_clips=60):
         loop_count = round_count if round_count != 'infinite' else 1
@@ -28,7 +28,7 @@ class PuppyClips(object):
         basename = '{}'.format(time.strftime('%Y.%m.%d-%H:%M'))
         h264_name = '{}.h264'.format(basename)
         mp4_name = '{}.mp4'.format(basename)
-
+        
         self._camera.start_recording(h264_name)
         time.sleep(60)
         self._camera.stop_recording()
@@ -37,7 +37,7 @@ class PuppyClips(object):
         self._upload_to_dropbox(mp4_name)
 
     def _convert_h264_to_mp4(self, h264_name, mp4_name):
-        subprocess.call(['MP4Box', '-fps', '30', '-add',
+        subprocess.call(['MP4Box', '-fps', '20', '-add',
                          h264_name,
                          mp4_name])
         os.remove(h264_name)
