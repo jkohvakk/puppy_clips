@@ -28,7 +28,7 @@ class PuppyClips(object):
         basename = '{}'.format(time.strftime('%Y.%m.%d-%H:%M'))
         h264_name = '{}.h264'.format(basename)
         mp4_name = '{}.mp4'.format(basename)
-        
+
         self._camera.start_recording(h264_name)
         time.sleep(60)
         self._camera.stop_recording()
