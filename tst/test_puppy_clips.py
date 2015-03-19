@@ -4,32 +4,6 @@ import mock_time
 from mock import patch, Mock, call
 
 
-class SelfTrackingMock(object):
-
-    instances = []
-
-    @classmethod
-    def get_instances(cls):
-        return cls.instances
-
-    @classmethod
-    def reset(cls):
-        cls.instances = []
-
-    def __init__(self):
-        self.__class__.instances.append(self)
-        self._calls = []
-
-
-class MockOs(object):
-
-    remove_calls = []
-
-    @classmethod
-    def remove(cls, filename):
-        cls.remove_calls.append(filename)
-
-
 class TestPuppyClips(unittest.TestCase):
 
     def setUp(self):
@@ -58,12 +32,13 @@ class TestPuppyClips(unittest.TestCase):
         self.movements = movements
         mock_is_movement.side_effect = self.get_movements
 
+    @patch('puppyclips.os')
     @patch('puppyclips.subprocess')
     @patch('puppyclips.movementsensor.MovementSensor.is_movement')
     def test_if_movement_a_minute_clip_is_taken_with_name_based_on_current_datetime(self,
                                                                                     is_movement,
-                                                                                    subprocess):
-        puppyclips.os = MockOs
+                                                                                    subprocess,
+                                                                                    os):
         self.set_mock_movements([False, True, False], is_movement)
         self.pc.run(3)
         self.assertEqual(mock_time.get_mock_sleep_calls(), 4)
@@ -71,9 +46,10 @@ class TestPuppyClips(unittest.TestCase):
         self.picamera.start_recording.assert_called_once_with('2015.01.31-20:10.h264')
         self.picamera.stop_recording.assert_called_once_with()
 
+    @patch('puppyclips.os')
     @patch('puppyclips.subprocess')
     @patch('puppyclips.movementsensor.MovementSensor.is_movement')
-    def test_it_is_possible_to_set_max_clips(self, is_movement, subprocess):
+    def test_it_is_possible_to_set_max_clips(self, is_movement, subprocess, os):
         self.set_mock_movements([True, True, True], is_movement)
         self.pc.run(3, max_clips=2)
         expected_picamera_mock_calls = [call.start_recording('2015.01.31-20:10.h264'),
@@ -83,22 +59,22 @@ class TestPuppyClips(unittest.TestCase):
         self.assertEqual(expected_picamera_mock_calls, self.picamera.mock_calls)
         self.assertEqual(mock_time.get_mock_sleep_calls(), 4)
 
+    @patch('puppyclips.os')
     @patch('puppyclips.subprocess')
     @patch('puppyclips.movementsensor.MovementSensor.is_movement')
-    def test_clip_is_converted_from_h264_to_mp4(self, is_movement, subprocess):
-        puppyclips.os = MockOs
+    def test_clip_is_converted_from_h264_to_mp4(self, is_movement, subprocess, os):
         self.set_mock_movements([False, True, False], is_movement)
         self.pc.run(3)
         self.assertEqual(call(['MP4Box',
                                '-fps', '20',
                                '-add', '2015.01.31-20:10.h264',
                                '2015.01.31-20:10.mp4']), subprocess.call.mock_calls[0])
-        self.assertEqual(MockOs.remove_calls[0], '2015.01.31-20:10.h264')
+        os.remove.assert_called_once_with('2015.01.31-20:10.h264')
 
+    @patch('puppyclips.os')
     @patch('puppyclips.subprocess')
     @patch('puppyclips.movementsensor.MovementSensor.is_movement')
-    def test_clip_is_uploaded_to_dropbox(self, is_movement, subprocess):
-        puppyclips.os = MockOs
+    def test_clip_is_uploaded_to_dropbox(self, is_movement, subprocess, os):
         self.set_mock_movements([False, True, False], is_movement)
         self.pc.run(3)
         self.assertEqual(call(['/home/pi/Dropbox-Uploader/dropbox_uploader.sh',
